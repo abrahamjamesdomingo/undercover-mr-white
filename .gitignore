@@ -1,0 +1,12 @@
+# Backups and build leftovers
+words.json.truncated.bak
+dist/
+node_modules/
+
+# Browser test artifacts
+.playwright-mcp/
+
+# OS noise
+.DS_Store
+Thumbs.db
+*.log

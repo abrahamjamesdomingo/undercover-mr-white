@@ -1,0 +1,5 @@
+# Keep line endings LF everywhere: the build scripts match source text with regexes
+# that assume LF, and a CRLF checkout would break them.
+* text=auto eol=lf
+
+*.png binary

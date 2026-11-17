@@ -1,0 +1,2357 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0c0b12" />
+  <meta name="description" content="Pass-and-play Undercover & Mr. White party game" />
+  <title>Undercover</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23b7a2ff'/%3E%3Ctext x='16' y='23' font-family='system-ui' font-size='20' font-weight='700' text-anchor='middle' fill='%2316101f'%3EU%3C/text%3E%3C/svg%3E" />
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0b0a10;
+  --bg-soft: #131120;
+  --card: rgba(255, 255, 255, 0.045);
+  --card-strong: rgba(255, 255, 255, 0.075);
+  --line: rgba(255, 255, 255, 0.09);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --ink: #f5f3fb;
+  --muted: #9c98ae;
+  --accent: #b7a2ff;
+  --accent-soft: rgba(183, 162, 255, 0.16);
+  --gold: #ffd479;
+  --danger: #ff6b8a;
+  --success: #6ee7a8;
+  --radius: 18px;
+  --radius-sm: 12px;
+  --font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  --mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(1100px 600px at 15% -10%, rgba(120, 88, 220, 0.28), transparent 65%),
+    radial-gradient(800px 500px at 100% 0%, rgba(255, 176, 92, 0.12), transparent 60%),
+    var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app {
+  min-height: 100dvh;
+}
+
+.screen {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 24px 18px calc(148px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.screen--center {
+  min-height: 100dvh;
+  justify-content: center;
+  padding-bottom: 24px;
+}
+
+.screen--reveal {
+  min-height: 100dvh;
+}
+
+.screen--reveal .hold-card {
+  margin-block: auto;
+}
+
+.boot {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+.empty-state {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 26px;
+}
+
+.empty-state h1 {
+  margin: 0 0 10px;
+  font-size: 1.3rem;
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+/* ------------------------------------------------------------- typography -- */
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+h2 {
+  font-size: 1.06rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.accent {
+  color: var(--accent);
+}
+
+.eyebrow {
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 0.82rem;
+}
+
+/* ----------------------------------------------------------------- header -- */
+
+.topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 4px 0 6px;
+}
+
+.topbar .eyebrow {
+  margin-bottom: 4px;
+}
+
+.pool-badge {
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  text-align: right;
+  min-width: 84px;
+}
+
+.pool-badge strong {
+  display: block;
+  font-size: 1.22rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.pool-badge span {
+  font-size: 0.62rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pool-badge.is-empty strong {
+  color: var(--gold);
+}
+
+/* ------------------------------------------------------------------ cards -- */
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  backdrop-filter: blur(8px);
+}
+
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card-head .muted {
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----------------------------------------------------------------- players -- */
+
+.player-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.seat {
+  width: 24px;
+  flex: none;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.name-input {
+  flex: 1;
+  min-width: 0;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95rem;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.name-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(0, 0, 0, 0.42);
+}
+
+.player-score {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--muted);
+  min-width: 38px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.player-score small {
+  font-size: 0.58rem;
+  margin-left: 2px;
+  letter-spacing: 0.06em;
+}
+
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.icon-btn:hover:not(:disabled) {
+  color: var(--danger);
+  border-color: rgba(255, 107, 138, 0.45);
+}
+
+.icon-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ------------------------------------------------------------------ roles -- */
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+}
+
+.switch-row.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.switch-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.switch-copy strong {
+  font-size: 0.94rem;
+  font-weight: 600;
+}
+
+.switch-copy small {
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.switch-row input[type='checkbox'] {
+  appearance: none;
+  width: 46px;
+  height: 27px;
+  flex: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--line-strong);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.switch-row input[type='checkbox']::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s ease;
+}
+
+.switch-row input[type='checkbox']:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.switch-row input[type='checkbox']:checked::after {
+  transform: translateX(19px);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field--row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.field-label {
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.select {
+  appearance: none;
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 30px 8px 12px;
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 15px) 52%, calc(100% - 10px) 52%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 3px;
+  gap: 3px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  align-self: flex-start;
+}
+
+.segmented button {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  padding: 7px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.segmented button.is-active {
+  background: var(--card-strong);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+}
+
+.segmented button em {
+  font-style: normal;
+  font-size: 0.68rem;
+  color: var(--muted);
+  margin-left: 5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.segmented--wide {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  width: 100%;
+}
+
+.segmented--wide button {
+  padding: 9px 4px;
+  font-size: 0.82rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.segmented--wide button em {
+  margin-left: 0;
+  font-size: 0.64rem;
+}
+
+.segmented--wide button.is-active em {
+  color: var(--accent);
+}
+
+/* --------------------------------------------------------------- category -- */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chip em {
+  font-style: normal;
+  font-size: 0.66rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+
+.chip.is-on {
+  color: var(--ink);
+  border-color: rgba(183, 162, 255, 0.55);
+  background: var(--accent-soft);
+}
+
+.chip.is-on em {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.chip:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
+}
+
+.link {
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 0;
+}
+
+.warn {
+  color: var(--gold);
+  background: rgba(255, 212, 121, 0.1);
+  border: 1px solid rgba(255, 212, 121, 0.25);
+  border-radius: 10px;
+  padding: 9px 11px;
+  font-size: 0.82rem;
+}
+
+/* ----------------------------------------------------------------- button -- */
+
+.btn {
+  border: 1px solid var(--line);
+  background: var(--card-strong);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  padding: 12px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.08s ease, filter 0.15s ease, background 0.15s ease;
+}
+
+.btn:active {
+  transform: scale(0.985);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--line);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  color: var(--ink);
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, #c9b6ff, #a98cf5);
+  border-color: transparent;
+  color: #16101f;
+}
+
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.btn-danger {
+  background: rgba(255, 107, 138, 0.14);
+  border-color: rgba(255, 107, 138, 0.45);
+  color: #ffc2cf;
+}
+
+.btn-lg {
+  width: 100%;
+  padding: 16px 20px;
+  font-size: 1.02rem;
+  border-radius: 14px;
+}
+
+/* ------------------------------------------------------------------- dock -- */
+
+.dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 12px 18px calc(14px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  background: linear-gradient(180deg, rgba(11, 10, 16, 0), rgba(11, 10, 16, 0.92) 45%);
+  backdrop-filter: blur(10px);
+  z-index: 20;
+}
+
+.dock > * {
+  width: 100%;
+  max-width: 484px;
+}
+
+.dock-note {
+  text-align: center;
+  font-size: 0.74rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.dock .btn-ghost {
+  border-color: transparent;
+}
+
+/* ------------------------------------------------------------------ stage -- */
+
+.stage {
+  padding: 44px 4px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stage--tight {
+  padding: 18px 2px 4px;
+}
+
+.stage-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.stage-title .accent {
+  filter: drop-shadow(0 0 22px rgba(183, 162, 255, 0.35));
+}
+
+/* ---------------------------------------------------------- reveal / hold -- */
+
+.hold-card {
+  position: relative;
+  min-height: 340px;
+  border-radius: 24px;
+  border: 1px solid var(--line-strong);
+  background:
+    radial-gradient(600px 260px at 50% 0%, rgba(183, 162, 255, 0.16), transparent 70%),
+    var(--bg-soft);
+  display: grid;
+  place-items: center;
+  padding: 28px 22px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+  overflow: hidden;
+  transition: border-color 0.2s ease, transform 0.12s ease;
+}
+
+.hold-card:active {
+  transform: scale(0.995);
+}
+
+.hold-card.is-revealed {
+  border-color: rgba(183, 162, 255, 0.6);
+  box-shadow: 0 0 0 1px rgba(183, 162, 255, 0.25), 0 24px 70px -30px rgba(140, 110, 255, 0.8);
+}
+
+.hold-idle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  transition: opacity 0.15s ease;
+}
+
+.hold-idle strong {
+  color: var(--ink);
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+}
+
+.hold-idle small {
+  font-size: 0.78rem;
+}
+
+.hold-icon {
+  font-size: 1.6rem;
+  color: var(--accent);
+  margin-bottom: 2px;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.94); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+
+.hold-word {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 26px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.16s ease;
+}
+
+.hold-card.is-revealed .hold-word {
+  opacity: 1;
+  visibility: visible;
+}
+
+.hold-card.is-revealed .hold-idle {
+  opacity: 0;
+}
+
+.word {
+  font-size: clamp(2.1rem, 9vw, 2.9rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+  text-wrap: balance;
+  background: linear-gradient(180deg, #fff, #cbb9ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.word-note {
+  font-size: 0.78rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.mw-flag {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--danger);
+  text-transform: uppercase;
+}
+
+.mw-copy {
+  font-size: 0.9rem;
+  color: var(--muted);
+  max-width: 26ch;
+  text-wrap: balance;
+}
+
+/* -------------------------------------------------------------- discussion -- */
+
+.order-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--card);
+}
+
+.order-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--line);
+  font-size: 0.95rem;
+}
+
+.order-list li:first-child {
+  border-top: none;
+}
+
+.order-list li:first-child .order-index {
+  background: var(--accent);
+  color: #16101f;
+}
+
+.order-list li.is-out {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: rgba(255, 255, 255, 0.25);
+}
+
+.order-index {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.out-flag {
+  margin-left: auto;
+  font-style: normal;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--danger);
+}
+
+.clock {
+  align-self: center;
+  font-family: var(--mono);
+  font-size: 2rem;
+  font-variant-numeric: tabular-nums;
+  padding: 6px 20px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--card);
+}
+
+.clock.is-done {
+  color: var(--gold);
+  border-color: rgba(255, 212, 121, 0.4);
+}
+
+.vote-history {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  font-size: 0.72rem;
+  padding: 5px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.tag--undercover {
+  color: #ffc2cf;
+  border-color: rgba(255, 107, 138, 0.35);
+}
+
+.tag--mrwhite {
+  color: var(--gold);
+  border-color: rgba(255, 212, 121, 0.35);
+}
+
+.tag--civilian {
+  color: #bfe6ff;
+  border-color: rgba(120, 190, 255, 0.3);
+}
+
+/* ------------------------------------------------------------------ voting -- */
+
+.vote-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 10px;
+}
+
+.vote-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.vote-btn.is-active {
+  border-color: var(--danger);
+  background: rgba(255, 107, 138, 0.13);
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.confirm {
+  border: 1px solid rgba(255, 107, 138, 0.35);
+  background: rgba(255, 107, 138, 0.08);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.confirm-actions .btn {
+  flex: 1;
+}
+
+/* ------------------------------------------------------------- elimination -- */
+
+.reveal-card {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 22px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--bg-soft);
+}
+
+.reveal-card--undercover {
+  border-color: rgba(255, 107, 138, 0.4);
+  background: radial-gradient(500px 200px at 50% 0%, rgba(255, 107, 138, 0.16), transparent 70%), var(--bg-soft);
+}
+
+.reveal-card--mrwhite {
+  border-color: rgba(255, 212, 121, 0.4);
+  background: radial-gradient(500px 200px at 50% 0%, rgba(255, 212, 121, 0.16), transparent 70%), var(--bg-soft);
+}
+
+.reveal-card--civilian {
+  border-color: rgba(120, 190, 255, 0.35);
+  background: radial-gradient(500px 200px at 50% 0%, rgba(120, 190, 255, 0.13), transparent 70%), var(--bg-soft);
+}
+
+.role-flag {
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.reveal-card--undercover .role-flag {
+  color: var(--danger);
+}
+
+.reveal-card--mrwhite .role-flag {
+  color: var(--gold);
+}
+
+.reveal-card--civilian .role-flag {
+  color: #9fd6ff;
+}
+
+.guess {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  background: var(--card);
+}
+
+.input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+  padding: 13px 14px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.outcome {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+  text-align: center;
+  padding: 8px 0;
+}
+
+.outcome-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.outcome .muted {
+  font-size: 0.86rem;
+}
+
+/* -------------------------------------------------------------- round over -- */
+
+.card--words {
+  background:
+    radial-gradient(500px 200px at 50% 0%, rgba(183, 162, 255, 0.14), transparent 70%),
+    var(--card);
+  text-align: center;
+}
+
+.word-pair {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.word-pair div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.word-pair small {
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.word-pair strong {
+  font-size: 1.16rem;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.word-divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--line);
+  flex: none !important;
+}
+
+.result-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  overflow: hidden;
+}
+
+.result-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-top: 1px solid var(--line);
+  font-size: 0.9rem;
+}
+
+.result-list li:first-child {
+  border-top: none;
+}
+
+.role-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  background: #9fd6ff;
+}
+
+.role-dot--undercover {
+  background: var(--danger);
+}
+
+.role-dot--mrwhite {
+  background: var(--gold);
+}
+
+.result-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.result-role {
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.result-points {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--muted);
+  min-width: 30px;
+  text-align: right;
+}
+
+.result-points.is-scored {
+  color: var(--success);
+}
+
+.scoreboard {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.scoreboard li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 2px;
+  font-size: 0.9rem;
+}
+
+.scoreboard .rank {
+  width: 18px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.scoreboard li span:nth-child(2) {
+  flex: 1;
+}
+
+.scoreboard strong {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------ misc -- */
+
+@media (min-width: 560px) {
+  .screen {
+    padding-top: 34px;
+  }
+
+  h1 {
+    font-size: 2.15rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+</style>
+</head>
+<body>
+  <main id="app" class="app">
+    <div class="boot">Starting…</div>
+  </main>
+<script>
+globalThis.__UNDERCOVER_WORDS__ = {"Food & Drinks":[{"id":"fd1","main":"Coffee","impostor":"Tea","difficulty":"medium"},{"id":"fd2","main":"Pizza","impostor":"Calzone","difficulty":"hard"},{"id":"fd3","main":"Sushi","impostor":"Sashimi","difficulty":"medium"},{"id":"fd4","main":"Burger","impostor":"Sandwich","difficulty":"medium"},{"id":"fd5","main":"Pancake","impostor":"Waffle","difficulty":"hard"},{"id":"fd6","main":"Ice Cream","impostor":"Gelato","difficulty":"hard"},{"id":"fd7","main":"Ramen","impostor":"Pho","difficulty":"medium"},{"id":"fd8","main":"Taco","impostor":"Burrito","difficulty":"hard"},{"id":"fd9","main":"Croissant","impostor":"Baguette","difficulty":"medium"},{"id":"fd10","main":"Ketchup","impostor":"Barbecue Sauce","difficulty":"hard"},{"id":"fd11","main":"Milk Tea","impostor":"Iced Latte","difficulty":"medium"},{"id":"fd12","main":"Fried Chicken","impostor":"Chicken Nuggets","difficulty":"medium"},{"id":"fd13","main":"Spaghetti","impostor":"Carbonara","difficulty":"hard"},{"id":"fd14","main":"Donut","impostor":"Bagel","difficulty":"medium"},{"id":"fd15","main":"Butter","impostor":"Margarine","difficulty":"hard"},{"id":"fd16","main":"Lemonade","impostor":"Orange Juice","difficulty":"easy"},{"id":"fd17","main":"Chocolate","impostor":"Caramel","difficulty":"medium"},{"id":"fd18","main":"French Fries","impostor":"Potato Wedges","difficulty":"hard"},{"id":"fd19","main":"Steak","impostor":"Pork Chop","difficulty":"medium"},{"id":"fd20","main":"Yogurt","impostor":"Sour Cream","difficulty":"medium"},{"id":"fd21","main":"Hotdog","impostor":"Sausage","difficulty":"hard"},{"id":"fd22","main":"Honey","impostor":"Maple Syrup","difficulty":"hard"},{"id":"fd23","main":"Dumpling","impostor":"Siomai","difficulty":"hard"},{"id":"fd24","main":"Smoothie","impostor":"Milkshake","difficulty":"hard"},{"id":"fd25","main":"Popcorn","impostor":"Potato Chips","difficulty":"medium"}],"Tech & Gaming":[{"id":"tg1","main":"Discord","impostor":"Slack","difficulty":"hard"},{"id":"tg2","main":"Spotify","impostor":"Apple Music","difficulty":"hard"},{"id":"tg3","main":"PlayStation","impostor":"Xbox","difficulty":"hard"},{"id":"tg4","main":"Laptop","impostor":"Tablet","difficulty":"medium"},{"id":"tg5","main":"Wi-Fi","impostor":"Bluetooth","difficulty":"medium"},{"id":"tg6","main":"Minecraft","impostor":"Terraria","difficulty":"hard"},{"id":"tg7","main":"Valorant","impostor":"Counter-Strike","difficulty":"hard"},{"id":"tg8","main":"Keyboard","impostor":"Typewriter","difficulty":"medium"},{"id":"tg9","main":"Smartwatch","impostor":"Fitness Tracker","difficulty":"hard"},{"id":"tg10","main":"USB Drive","impostor":"SD Card","difficulty":"medium"},{"id":"tg11","main":"Headphones","impostor":"Earbuds","difficulty":"hard"},{"id":"tg12","main":"Instagram","impostor":"TikTok","difficulty":"medium"},{"id":"tg13","main":"Google Chrome","impostor":"Safari","difficulty":"hard"},{"id":"tg14","main":"Power Bank","impostor":"Charger","difficulty":"medium"},{"id":"tg15","main":"Mouse","impostor":"Touchpad","difficulty":"hard"},{"id":"tg16","main":"Windows","impostor":"macOS","difficulty":"hard"},{"id":"tg17","main":"Screenshot","impostor":"Screen Recording","difficulty":"hard"},{"id":"tg18","main":"QR Code","impostor":"Barcode","difficulty":"hard"},{"id":"tg19","main":"Webcam","impostor":"DSLR Camera","difficulty":"medium"},{"id":"tg20","main":"VR Headset","impostor":"3D Glasses","difficulty":"hard"},{"id":"tg21","main":"Router","impostor":"Modem","difficulty":"hard"},{"id":"tg22","main":"Twitch","impostor":"YouTube Live","difficulty":"hard"},{"id":"tg23","main":"Password","impostor":"PIN Code","difficulty":"hard"},{"id":"tg24","main":"Photoshop","impostor":"Canva","difficulty":"medium"},{"id":"tg25","main":"Robot","impostor":"Cyborg","difficulty":"hard"}],"Places & Travel":[{"id":"pt1","main":"Hotel","impostor":"Airbnb","difficulty":"medium"},{"id":"pt2","main":"Beach","impostor":"Swimming Pool","difficulty":"easy"},{"id":"pt3","main":"Airport","impostor":"Train Station","difficulty":"easy"},{"id":"pt4","main":"Library","impostor":"Bookstore","difficulty":"medium"},{"id":"pt5","main":"Cinema","impostor":"Theater","difficulty":"hard"},{"id":"pt6","main":"Museum","impostor":"Art Gallery","difficulty":"hard"},{"id":"pt7","main":"Gym","impostor":"Playground","difficulty":"easy"},{"id":"pt8","main":"Hospital","impostor":"Clinic","difficulty":"hard"},{"id":"pt9","main":"Supermarket","impostor":"Convenience Store","difficulty":"medium"},{"id":"pt10","main":"Escalator","impostor":"Elevator","difficulty":"hard"},{"id":"pt11","main":"Zoo","impostor":"Aquarium","difficulty":"easy"},{"id":"pt12","main":"Bridge","impostor":"Tunnel","difficulty":"medium"},{"id":"pt13","main":"Island","impostor":"Peninsula","difficulty":"hard"},{"id":"pt14","main":"Desert","impostor":"Savanna","difficulty":"easy"},{"id":"pt15","main":"Castle","impostor":"Palace","difficulty":"hard"},{"id":"pt16","main":"Bakery","impostor":"Cafe","difficulty":"medium"},{"id":"pt17","main":"Amusement Park","impostor":"Water Park","difficulty":"medium"},{"id":"pt18","main":"Stadium","impostor":"Arena","difficulty":"hard"},{"id":"pt19","main":"Subway","impostor":"Bus","difficulty":"easy"},{"id":"pt20","main":"Passport","impostor":"Visa","difficulty":"medium"},{"id":"pt21","main":"Lighthouse","impostor":"Watchtower","difficulty":"medium"},{"id":"pt22","main":"Cemetery","impostor":"Mausoleum","difficulty":"medium"},{"id":"pt23","main":"Cave","impostor":"Mine","difficulty":"medium"},{"id":"pt24","main":"Balcony","impostor":"Rooftop","difficulty":"hard"},{"id":"pt25","main":"Pharmacy","impostor":"Emergency Room","difficulty":"easy"}],"Daily Objects":[{"id":"do1","main":"Umbrella","impostor":"Raincoat","difficulty":"medium"},{"id":"do2","main":"Pillow","impostor":"Cushion","difficulty":"hard"},{"id":"do3","main":"Sunglasses","impostor":"Eyeglasses","difficulty":"hard"},{"id":"do4","main":"Backpack","impostor":"Suitcase","difficulty":"medium"},{"id":"do5","main":"Candle","impostor":"Flashlight","difficulty":"easy"},{"id":"do6","main":"Watch","impostor":"Wall Clock","difficulty":"hard"},{"id":"do7","main":"Toothbrush","impostor":"Hairbrush","difficulty":"hard"},{"id":"do8","main":"Blanket","impostor":"Bedsheet","difficulty":"medium"},{"id":"do9","main":"Spoon","impostor":"Ladle","difficulty":"hard"},{"id":"do10","main":"Wallet","impostor":"Coin Purse","difficulty":"hard"},{"id":"do11","main":"Scissors","impostor":"Paper Cutter","difficulty":"medium"},{"id":"do12","main":"Mirror","impostor":"Window","difficulty":"easy"},{"id":"do13","main":"Broom","impostor":"Mop","difficulty":"hard"},{"id":"do14","main":"Towel","impostor":"Tissue Paper","difficulty":"easy"},{"id":"do15","main":"Key","impostor":"Padlock","difficulty":"easy"},{"id":"do16","main":"Chair","impostor":"Stool","difficulty":"hard"},{"id":"do17","main":"Mug","impostor":"Tumbler","difficulty":"hard"},{"id":"do18","main":"Stapler","impostor":"Paperclip","difficulty":"easy"},{"id":"do19","main":"Soap","impostor":"Shampoo","difficulty":"medium"},{"id":"do20","main":"Lighter","impostor":"Matchstick","difficulty":"hard"},{"id":"do21","main":"Curtain","impostor":"Window Blinds","difficulty":"hard"},{"id":"do22","main":"Fan","impostor":"Air Conditioner","difficulty":"hard"},{"id":"do23","main":"Fork","impostor":"Chopsticks","difficulty":"medium"},{"id":"do24","main":"Hanger","impostor":"Clothespin","difficulty":"medium"},{"id":"do25","main":"Alarm Clock","impostor":"Stopwatch","difficulty":"medium"}],"Animals & Nature":[{"id":"an1","main":"Wolf","impostor":"Husky","difficulty":"medium"},{"id":"an2","main":"Alligator","impostor":"Crocodile","difficulty":"hard"},{"id":"an3","main":"Butterfly","impostor":"Moth","difficulty":"hard"},{"id":"an4","main":"Dolphin","impostor":"Shark","difficulty":"easy"},{"id":"an5","main":"Turtle","impostor":"Tortoise","difficulty":"hard"},{"id":"an6","main":"Eagle","impostor":"Hawk","difficulty":"hard"},{"id":"an7","main":"Bee","impostor":"Wasp","difficulty":"hard"},{"id":"an8","main":"Penguin","impostor":"Puffin","difficulty":"medium"},{"id":"an9","main":"Volcano","impostor":"Mountain","difficulty":"easy"},{"id":"an10","main":"River","impostor":"Stream","difficulty":"hard"},{"id":"an11","main":"Tiger","impostor":"Leopard","difficulty":"hard"},{"id":"an12","main":"Frog","impostor":"Toad","difficulty":"hard"},{"id":"an13","main":"Rabbit","impostor":"Hamster","difficulty":"medium"},{"id":"an14","main":"Octopus","impostor":"Squid","difficulty":"hard"},{"id":"an15","main":"Llama","impostor":"Alpaca","difficulty":"hard"},{"id":"an16","main":"Seal","impostor":"Sea Lion","difficulty":"hard"},{"id":"an17","main":"Owl","impostor":"Bat","difficulty":"easy"},{"id":"an18","main":"Cactus","impostor":"Aloe Vera","difficulty":"medium"},{"id":"an19","main":"Hurricane","impostor":"Tornado","difficulty":"hard"},{"id":"an20","main":"Snow","impostor":"Hail","difficulty":"hard"},{"id":"an21","main":"Waterfall","impostor":"Fountain","difficulty":"medium"},{"id":"an22","main":"Spider","impostor":"Scorpion","difficulty":"medium"},{"id":"an23","main":"Horse","impostor":"Donkey","difficulty":"hard"},{"id":"an24","main":"Coral","impostor":"Seaweed","difficulty":"medium"},{"id":"an25","main":"Rainbow","impostor":"Aurora Borealis","difficulty":"easy"}],"Movies, TV & Pop Culture":[{"id":"mp1","main":"Netflix","impostor":"YouTube","difficulty":"easy"},{"id":"mp2","main":"Batman","impostor":"Iron Man","difficulty":"medium"},{"id":"mp3","main":"Harry Potter","impostor":"Percy Jackson","difficulty":"hard"},{"id":"mp4","main":"Zombie","impostor":"Vampire","difficulty":"medium"},{"id":"mp5","main":"Anime","impostor":"Cartoon","difficulty":"hard"},{"id":"mp6","main":"Podcast","impostor":"Radio Show","difficulty":"hard"},{"id":"mp7","main":"Sitcom","impostor":"Stand-up Comedy","difficulty":"easy"},{"id":"mp8","main":"Sequel","impostor":"Remake","difficulty":"hard"},{"id":"mp9","main":"Oscar","impostor":"Grammy","difficulty":"medium"},{"id":"mp10","main":"Superhero","impostor":"Villain","difficulty":"medium"},{"id":"mp11","main":"Spider-Man","impostor":"Deadpool","difficulty":"medium"},{"id":"mp12","main":"Star Wars","impostor":"Star Trek","difficulty":"hard"},{"id":"mp13","main":"Pokemon","impostor":"Digimon","difficulty":"hard"},{"id":"mp14","main":"Horror Movie","impostor":"Thriller Movie","difficulty":"hard"},{"id":"mp15","main":"Trailer","impostor":"Teaser","difficulty":"hard"},{"id":"mp16","main":"Subtitles","impostor":"Dubbing","difficulty":"medium"},{"id":"mp17","main":"Manga","impostor":"Comic Book","difficulty":"hard"},{"id":"mp18","main":"Cosplay","impostor":"Halloween Costume","difficulty":"hard"},{"id":"mp19","main":"Spoiler","impostor":"Plot Twist","difficulty":"medium"},{"id":"mp20","main":"Cameo","impostor":"Main Character","difficulty":"easy"},{"id":"mp21","main":"Paparazzi","impostor":"Bodyguard","difficulty":"easy"},{"id":"mp22","main":"Autograph","impostor":"Selfie","difficulty":"easy"},{"id":"mp23","main":"Soundtrack","impostor":"Ringtone","difficulty":"medium"},{"id":"mp24","main":"Binge-Watching","impostor":"Livestreaming","difficulty":"medium"},{"id":"mp25","main":"Cliffhanger","impostor":"Finale","difficulty":"medium"}],"Sports & Activities":[{"id":"sa1","main":"Basketball","impostor":"Volleyball","difficulty":"medium"},{"id":"sa2","main":"Tennis","impostor":"Badminton","difficulty":"hard"},{"id":"sa3","main":"Camping","impostor":"Hiking","difficulty":"medium"},{"id":"sa4","main":"Chess","impostor":"Checkers","difficulty":"hard"},{"id":"sa5","main":"Marathon","impostor":"Sprint","difficulty":"hard"},{"id":"sa6","main":"Swimming","impostor":"Surfing","difficulty":"easy"},{"id":"sa7","main":"Karaoke","impostor":"Concert","difficulty":"medium"},{"id":"sa8","main":"Skateboard","impostor":"Scooter","difficulty":"medium"},{"id":"sa9","main":"Yoga","impostor":"Stretching","difficulty":"hard"},{"id":"sa10","main":"Boxing","impostor":"MMA","difficulty":"hard"},{"id":"sa11","main":"Soccer","impostor":"Rugby","difficulty":"medium"},{"id":"sa12","main":"Bowling","impostor":"Golf","difficulty":"easy"},{"id":"sa13","main":"Push-up","impostor":"Plank","difficulty":"hard"},{"id":"sa14","main":"Skiing","impostor":"Snowboarding","difficulty":"hard"},{"id":"sa15","main":"Fishing","impostor":"Hunting","difficulty":"easy"},{"id":"sa16","main":"Table Tennis","impostor":"Air Hockey","difficulty":"easy"},{"id":"sa17","main":"Archery","impostor":"Darts","difficulty":"medium"},{"id":"sa18","main":"Cycling","impostor":"Motorcycling","difficulty":"hard"},{"id":"sa19","main":"Referee","impostor":"Coach","difficulty":"medium"},{"id":"sa20","main":"Trophy","impostor":"Medal","difficulty":"hard"},{"id":"sa21","main":"Hide and Seek","impostor":"Tag","difficulty":"hard"},{"id":"sa22","main":"Scuba Diving","impostor":"Snorkeling","difficulty":"hard"},{"id":"sa23","main":"Billiards","impostor":"Bowling","difficulty":"easy"},{"id":"sa24","main":"Jump Rope","impostor":"Hula Hoop","difficulty":"medium"},{"id":"sa25","main":"Weightlifting","impostor":"CrossFit","difficulty":"medium"}],"Jobs & Professions":[{"id":"jp1","main":"Doctor","impostor":"Nurse","difficulty":"medium"},{"id":"jp2","main":"Chef","impostor":"Baker","difficulty":"medium"},{"id":"jp3","main":"Pilot","impostor":"Flight Attendant","difficulty":"medium"},{"id":"jp4","main":"Police Officer","impostor":"Security Guard","difficulty":"medium"},{"id":"jp5","main":"Teacher","impostor":"Tutor","difficulty":"hard"},{"id":"jp6","main":"Architect","impostor":"Interior Designer","difficulty":"medium"},{"id":"jp7","main":"Lawyer","impostor":"Judge","difficulty":"hard"},{"id":"jp8","main":"Photographer","impostor":"Videographer","difficulty":"hard"},{"id":"jp9","main":"Dentist","impostor":"Orthodontist","difficulty":"hard"},{"id":"jp10","main":"Detective","impostor":"Spy","difficulty":"medium"},{"id":"jp11","main":"Firefighter","impostor":"Paramedic","difficulty":"medium"},{"id":"jp12","main":"Barista","impostor":"Bartender","difficulty":"medium"},{"id":"jp13","main":"Astronaut","impostor":"Astronomer","difficulty":"medium"},{"id":"jp14","main":"Actor","impostor":"Stunt Double","difficulty":"medium"},{"id":"jp15","main":"Magician","impostor":"Illusionist","difficulty":"hard"},{"id":"jp16","main":"Journalist","impostor":"News Anchor","difficulty":"medium"},{"id":"jp17","main":"Barber","impostor":"Hairstylist","difficulty":"hard"},{"id":"jp18","main":"Plumber","impostor":"Electrician","difficulty":"easy"},{"id":"jp19","main":"Veterinarian","impostor":"Zookeeper","difficulty":"medium"},{"id":"jp20","main":"Cashier","impostor":"Bank Teller","difficulty":"easy"},{"id":"jp21","main":"Programmer","impostor":"Hacker","difficulty":"medium"},{"id":"jp22","main":"DJ","impostor":"Music Producer","difficulty":"medium"},{"id":"jp23","main":"Librarian","impostor":"Archivist","difficulty":"hard"},{"id":"jp24","main":"Taxi Driver","impostor":"Delivery Rider","difficulty":"easy"},{"id":"jp25","main":"CEO","impostor":"Manager","difficulty":"hard"}],"Clothing & Fashion":[{"id":"cf1","main":"Hoodie","impostor":"Jacket","difficulty":"hard"},{"id":"cf2","main":"Sneakers","impostor":"Running Shoes","difficulty":"hard"},{"id":"cf3","main":"Jeans","impostor":"Chinos","difficulty":"hard"},{"id":"cf4","main":"Necklace","impostor":"Bracelet","difficulty":"medium"},{"id":"cf5","main":"Cap","impostor":"Beanie","difficulty":"hard"},{"id":"cf6","main":"Boots","impostor":"Loafers","difficulty":"medium"},{"id":"cf7","main":"T-Shirt","impostor":"Polo Shirt","difficulty":"hard"},{"id":"cf8","main":"Socks","impostor":"Stockings","difficulty":"hard"},{"id":"cf9","main":"Perfume","impostor":"Deodorant","difficulty":"medium"},{"id":"cf10","main":"Suit","impostor":"Tuxedo","difficulty":"hard"},{"id":"cf11","main":"Sandals","impostor":"Slippers","difficulty":"hard"},{"id":"cf12","main":"Scarf","impostor":"Necktie","difficulty":"medium"},{"id":"cf13","main":"Shorts","impostor":"Swim Trunks","difficulty":"medium"},{"id":"cf14","main":"Gloves","impostor":"Mittens","difficulty":"hard"},{"id":"cf15","main":"Belt","impostor":"Suspenders","difficulty":"medium"},{"id":"cf16","main":"Dress","impostor":"Gown","difficulty":"hard"},{"id":"cf17","main":"Skirt","impostor":"Pleated Skirt","difficulty":"hard"},{"id":"cf18","main":"Ring","impostor":"Earrings","difficulty":"medium"},{"id":"cf19","main":"Raincoat","impostor":"Poncho","difficulty":"medium"},{"id":"cf20","main":"Pajamas","impostor":"Bathrobe","difficulty":"medium"},{"id":"cf21","main":"Blazer","impostor":"Cardigan","difficulty":"medium"},{"id":"cf22","main":"Leggings","impostor":"Tights","difficulty":"hard"},{"id":"cf23","main":"Bucket Hat","impostor":"Sun Hat","difficulty":"hard"},{"id":"cf24","main":"Apron","impostor":"Oven Mitt","difficulty":"easy"},{"id":"cf25","main":"Flip-flops","impostor":"Crocs","difficulty":"medium"}],"Pinoy Food & Street Food":[{"id":"pf1","main":"Adobo","impostor":"Humba","difficulty":"medium"},{"id":"pf2","main":"Sinigang","impostor":"Nilaga","difficulty":"easy"},{"id":"pf3","main":"Fishball","impostor":"Kikiam","difficulty":"easy"},{"id":"pf4","main":"Kwek-Kwek","impostor":"Tokneneng","difficulty":"hard"},{"id":"pf5","main":"Halo-Halo","impostor":"Mais Con Yelo","difficulty":"easy"},{"id":"pf6","main":"Taho","impostor":"Tokwa't Baboy","difficulty":"medium"},{"id":"pf7","main":"Lumpia Shanghai","impostor":"Lumpiang Sariwa","difficulty":"medium"},{"id":"pf8","main":"Pancit Canton","impostor":"Pancit Bihon","difficulty":"easy"},{"id":"pf9","main":"Sisig","impostor":"Dinakdakan","difficulty":"hard"},{"id":"pf10","main":"Balut","impostor":"Penoy","difficulty":"medium"},{"id":"pf11","main":"Pandesal","impostor":"Ensaymada","difficulty":"easy"},{"id":"pf12","main":"Champorado","impostor":"Lugaw","difficulty":"easy"},{"id":"pf13","main":"Bicol Express","impostor":"Laing","difficulty":"medium"},{"id":"pf14","main":"Kare-Kare","impostor":"Kaldereta","difficulty":"medium"},{"id":"pf15","main":"Turon","impostor":"Banana Cue","difficulty":"easy"},{"id":"pf16","main":"Isaw","impostor":"Betamax","difficulty":"easy"},{"id":"pf17","main":"Lechon Baboy","impostor":"Lechon Kawali","difficulty":"medium"},{"id":"pf18","main":"Tapsilog","impostor":"Longsilog","difficulty":"easy"},{"id":"pf19","main":"Suman","impostor":"Bibingka","difficulty":"medium"},{"id":"pf20","main":"Buko Juice","impostor":"Sago't Gulaman","difficulty":"easy"},{"id":"pf21","main":"Bulalo","impostor":"Pares","difficulty":"medium"},{"id":"pf22","main":"Tinola","impostor":"Tinolang Isda","difficulty":"hard"},{"id":"pf23","main":"Mang Inasal","impostor":"Jollibee","difficulty":"easy"},{"id":"pf24","main":"Chicharon","impostor":"Bagnet","difficulty":"medium"},{"id":"pf25","main":"Puto","impostor":"Kutsinta","difficulty":"medium"}],"Pinoy Culture & Everyday Life":[{"id":"pc1","main":"Jeepney","impostor":"Tricycle","difficulty":"easy"},{"id":"pc2","main":"GCash","impostor":"Maya","difficulty":"easy"},{"id":"pc3","main":"Sari-Sari Store","impostor":"Palengke","difficulty":"easy"},{"id":"pc4","main":"Videoke","impostor":"Fiesta","difficulty":"easy"},{"id":"pc5","main":"Tabo","impostor":"Timba","difficulty":"medium"},{"id":"pc6","main":"Tsinelas","impostor":"Bakya","difficulty":"medium"},{"id":"pc7","main":"Balikbayan Box","impostor":"Pasalubong","difficulty":"medium"},{"id":"pc8","main":"Barangay Tanod","impostor":"Traffic Enforcer","difficulty":"medium"},{"id":"pc9","main":"Brownout","impostor":"Walang Tubig","difficulty":"easy"},{"id":"pc10","main":"Simbang Gabi","impostor":"Noche Buena","difficulty":"medium"},{"id":"pc11","main":"Mano Po","impostor":"Beso-Beso","difficulty":"medium"},{"id":"pc12","main":"Barong Tagalog","impostor":"Filipiniana","difficulty":"easy"},{"id":"pc13","main":"Walang Pasok","impostor":"Signal Number 3","difficulty":"medium"},{"id":"pc14","main":"Ukay-Ukay","impostor":"Tiangge","difficulty":"medium"},{"id":"pc15","main":"Electric Fan","impostor":"Aircon","difficulty":"easy"},{"id":"pc16","main":"Kulambo","impostor":"Banig","difficulty":"hard"},{"id":"pc17","main":"Bayanihan","impostor":"Utang na Loob","difficulty":"hard"},{"id":"pc18","main":"LRT","impostor":"MRT","difficulty":"hard"},{"id":"pc19","main":"Shopee","impostor":"Lazada","difficulty":"easy"},{"id":"pc20","main":"Grab","impostor":"Angkas","difficulty":"easy"},{"id":"pc21","main":"Sabong","impostor":"Tong-its","difficulty":"medium"},{"id":"pc22","main":"Marites","impostor":"Chismis","difficulty":"medium"},{"id":"pc23","main":"Ninong","impostor":"Ninang","difficulty":"hard"},{"id":"pc24","main":"Boodle Fight","impostor":"Handaan","difficulty":"medium"},{"id":"pc25","main":"Tingin-Tingin Lang","impostor":"Tawad","difficulty":"hard"}],"Pinoy Pop Culture & Showbiz":[{"id":"pp1","main":"Eat Bulaga","impostor":"It's Showtime","difficulty":"easy"},{"id":"pp2","main":"Vice Ganda","impostor":"Vhong Navarro","difficulty":"medium"},{"id":"pp3","main":"KathNiel","impostor":"AlDub","difficulty":"medium"},{"id":"pp4","main":"FPJ's Ang Probinsyano","impostor":"Batang Quiapo","difficulty":"hard"},{"id":"pp5","main":"Darna","impostor":"Captain Barbell","difficulty":"easy"},{"id":"pp6","main":"Encantadia","impostor":"Mulawin","difficulty":"medium"},{"id":"pp7","main":"SB19","impostor":"BINI","difficulty":"easy"},{"id":"pp8","main":"Ben&Ben","impostor":"IV of Spades","difficulty":"medium"},{"id":"pp9","main":"Eraserheads","impostor":"Parokya ni Edgar","difficulty":"medium"},{"id":"pp10","main":"Manny Pacquiao","impostor":"Efren Bata Reyes","difficulty":"easy"},{"id":"pp11","main":"Teleserye","impostor":"K-Drama","difficulty":"easy"},{"id":"pp12","main":"Pinoy Big Brother","impostor":"StarStruck","difficulty":"medium"},{"id":"pp13","main":"KMJS","impostor":"Rated K","difficulty":"medium"},{"id":"pp14","main":"Tala","impostor":"Pantropiko","difficulty":"medium"},{"id":"pp15","main":"Cardo Dalisay","impostor":"Tanggol","difficulty":"hard"},{"id":"pp16","main":"MMFF","impostor":"Cinemalaya","difficulty":"hard"},{"id":"pp17","main":"Mobile Legends","impostor":"Wild Rift","difficulty":"easy"},{"id":"pp18","main":"Moira Dela Torre","impostor":"Zack Tabudlo","difficulty":"medium"},{"id":"pp19","main":"Cong TV","impostor":"Ivana Alawi","difficulty":"easy"},{"id":"pp20","main":"Shake, Rattle & Roll","impostor":"Feng Shui","difficulty":"medium"},{"id":"pp21","main":"Sarah Geronimo","impostor":"Regine Velasquez","difficulty":"medium"},{"id":"pp22","main":"ABS-CBN","impostor":"GMA","difficulty":"easy"},{"id":"pp23","main":"Asap","impostor":"All-Out Sundays","difficulty":"hard"},{"id":"pp24","main":"Kuya Kim","impostor":"Ernie Baron","difficulty":"medium"},{"id":"pp25","main":"Budots","impostor":"Otso-Otso","difficulty":"medium"}],"Philippine Places & Landmarks":[{"id":"pl1","main":"Boracay","impostor":"Palawan","difficulty":"easy"},{"id":"pl2","main":"Baguio","impostor":"Tagaytay","difficulty":"easy"},{"id":"pl3","main":"Mayon Volcano","impostor":"Taal Volcano","difficulty":"medium"},{"id":"pl4","main":"Chocolate Hills","impostor":"Banaue Rice Terraces","difficulty":"easy"},{"id":"pl5","main":"Intramuros","impostor":"Vigan","difficulty":"medium"},{"id":"pl6","main":"BGC","impostor":"Makati","difficulty":"medium"},{"id":"pl7","main":"SM Mall of Asia","impostor":"SM Megamall","difficulty":"hard"},{"id":"pl8","main":"Siargao","impostor":"La Union","difficulty":"medium"},{"id":"pl9","main":"Luneta Park","impostor":"Quezon Memorial Circle","difficulty":"medium"},{"id":"pl10","main":"EDSA","impostor":"C5","difficulty":"hard"},{"id":"pl11","main":"Divisoria","impostor":"Baclaran","difficulty":"medium"},{"id":"pl12","main":"Sagada","impostor":"Batanes","difficulty":"medium"},{"id":"pl13","main":"Subic","impostor":"Clark","difficulty":"hard"},{"id":"pl14","main":"Corregidor","impostor":"Fort Santiago","difficulty":"hard"},{"id":"pl15","main":"Enchanted Kingdom","impostor":"Star City","difficulty":"easy"},{"id":"pl16","main":"Pampanga","impostor":"Bulacan","difficulty":"hard"},{"id":"pl17","main":"Cebu","impostor":"Davao","difficulty":"easy"},{"id":"pl18","main":"Hundred Islands","impostor":"El Nido","difficulty":"medium"},{"id":"pl19","main":"NAIA","impostor":"PITX","difficulty":"medium"},{"id":"pl20","main":"Manila Bay","impostor":"Laguna de Bay","difficulty":"hard"},{"id":"pl21","main":"Quiapo","impostor":"Binondo","difficulty":"medium"},{"id":"pl22","main":"Taguig","impostor":"Pasig","difficulty":"hard"},{"id":"pl23","main":"Cubao","impostor":"Monumento","difficulty":"hard"},{"id":"pl24","main":"Camiguin","impostor":"Siquijor","difficulty":"hard"},{"id":"pl25","main":"Pagsanjan Falls","impostor":"Maria Cristina Falls","difficulty":"hard"}]};
+// --- src/words.js ---
+// Word pool + drawing. Pure functions: no DOM, no storage, RNG injected.
+
+const DIFFICULTIES = ['easy', 'medium', 'hard'];
+
+const DIFFICULTY_LABELS = {
+  all: 'All',
+  easy: 'Easy',
+  medium: 'Medium',
+  hard: 'Hard',
+};
+
+/** Category names straight from the JSON keys - no hardcoded list anywhere. */
+function categoryNames(words) {
+  return Object.keys(words).filter((name) => Array.isArray(words[name]) && words[name].length > 0);
+}
+
+/** How many pairs each category holds for a given difficulty ('all' counts everything). */
+function categoryCounts(words, difficulty = 'all') {
+  const counts = {};
+  for (const name of categoryNames(words)) {
+    counts[name] = words[name].filter((pair) => difficulty === 'all' || pair.difficulty === difficulty).length;
+  }
+  return counts;
+}
+
+function poolSize(words, { categories, difficulty }) {
+  return buildPool(words, { categories, difficulty }).length;
+}
+
+/**
+ * Every pair matching the selected categories and difficulty.
+ * `categories` is a list of names; null/empty means all of them.
+ */
+function buildPool(words, { categories = null, difficulty = 'all' } = {}) {
+  const wanted = Array.isArray(categories) && categories.length ? categories : categoryNames(words);
+  const pool = [];
+  for (const name of wanted) {
+    const pairs = words[name];
+    if (!Array.isArray(pairs)) continue;
+    for (const pair of pairs) {
+      if (difficulty !== 'all' && pair.difficulty !== difficulty) continue;
+      pool.push({
+        id: pair.id,
+        main: pair.main,
+        impostor: pair.impostor,
+        difficulty: pair.difficulty ?? 'medium',
+        category: name,
+      });
+    }
+  }
+  return pool;
+}
+
+/** Pairs in the pool that have not been drawn yet. */
+function unusedPairs(pool, usedIds) {
+  const used = new Set(usedIds ?? []);
+  return pool.filter((pair) => !used.has(pair.id));
+}
+
+/**
+ * Draw a pair and decide whether the two words swap.
+ *
+ * Repeat protection: pairs already in `usedIds` are skipped. When every pair in
+ * the *current* pool has been used, only those ids are cleared - a category that
+ * is not selected keeps its progress, so switching filters never hands out a
+ * word twice.
+ *
+ * Returns the pair in its final orientation, the updated id list, and flags the
+ * caller can surface in the UI.
+ */
+function drawPair(pool, usedIds = [], rng = Math.random) {
+  if (!pool.length) throw new Error('drawPair: the pool is empty');
+
+  let used = [...usedIds];
+  let candidates = unusedPairs(pool, used);
+  let reset = false;
+
+  if (!candidates.length) {
+    const poolIds = new Set(pool.map((pair) => pair.id));
+    used = used.filter((id) => !poolIds.has(id));
+    candidates = pool.slice();
+    reset = true;
+  }
+
+  const index = Math.min(candidates.length - 1, Math.floor(rng() * candidates.length));
+  const chosen = candidates[index];
+  const swapped = rng() < 0.5;
+
+  return {
+    pick: chosen,
+    pair: {
+      ...chosen,
+      main: swapped ? chosen.impostor : chosen.main,
+      impostor: swapped ? chosen.main : chosen.impostor,
+    },
+    usedIds: [...used, chosen.id],
+    swapped,
+    reset,
+  };
+}
+
+// --- src/game.js ---
+// Game rules: player limits, role distribution, speaking order, win conditions
+// and scoring. All pure functions with an injectable RNG.
+
+const MIN_PLAYERS = 3;
+const MAX_PLAYERS = 10;
+
+const ROLES = {
+  civilian: 'civilian',
+  undercover: 'undercover',
+  mrwhite: 'mrwhite',
+};
+
+const ROLE_LABELS = {
+  civilian: 'Civilian',
+  undercover: 'Undercover',
+  mrwhite: 'Mr. White',
+};
+
+const POINTS = {
+  civiliansWin: 2,
+  impostorsWin: 4,
+  mrWhiteGuess: 5,
+};
+
+/** Spec: 1 undercover at 3-6 players, 1 or 2 at 7-10. */
+function allowedUndercoverCounts(playerCount) {
+  return playerCount >= 7 ? [1, 2] : [1];
+}
+
+/** Spec: Mr. White only exists from 4 players up. */
+function mrWhiteAvailable(playerCount) {
+  return playerCount >= MIN_PLAYERS + 1;
+}
+
+function specialCount({ includeMrWhite, undercoverCount }) {
+  return undercoverCount + (includeMrWhite ? 1 : 0);
+}
+
+/**
+ * Spec: special roles must be strictly fewer than half the players.
+ * Returns a human-readable reason when the setup is illegal, null when fine.
+ */
+function setupIssue({ playerCount, includeMrWhite, undercoverCount }) {
+  if (playerCount < MIN_PLAYERS) return `You need at least ${MIN_PLAYERS} players.`;
+  if (playerCount > MAX_PLAYERS) return `At most ${MAX_PLAYERS} players.`;
+  if (!allowedUndercoverCounts(playerCount).includes(undercoverCount)) {
+    return `${playerCount} players allows ${allowedUndercoverCounts(playerCount).join(' or ')} undercover.`;
+  }
+  if (includeMrWhite && !mrWhiteAvailable(playerCount)) {
+    return `Mr. White needs at least ${MIN_PLAYERS + 1} players.`;
+  }
+  const specials = specialCount({ includeMrWhite, undercoverCount });
+  if (specials >= playerCount / 2) {
+    return `${specials} special roles is too many for ${playerCount} players (must stay under half).`;
+  }
+  return null;
+}
+
+function shuffle(list, rng) {
+  const copy = [...list];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.min(i, Math.floor(rng() * (i + 1)));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+/**
+ * Deal roles to seat indexes. Returns one role per player, in seat order.
+ * Throws when the setup breaks the rules instead of silently rebalancing.
+ */
+function assignRoles(playerCount, { includeMrWhite = false, undercoverCount = 1 } = {}, rng = Math.random) {
+  const issue = setupIssue({ playerCount, includeMrWhite, undercoverCount });
+  if (issue) throw new Error(issue);
+
+  const seats = shuffle([...Array(playerCount).keys()], rng);
+  const roles = new Array(playerCount).fill(ROLES.civilian);
+  let cursor = 0;
+
+  for (let i = 0; i < undercoverCount; i += 1) roles[seats[cursor++]] = ROLES.undercover;
+  if (includeMrWhite) roles[seats[cursor++]] = ROLES.mrwhite;
+
+  return roles;
+}
+
+/**
+ * Randomized speaking order. Mr. White is never first, so they always get at
+ * least one clue to work from (spec requirement).
+ */
+function speakingOrder(playerCount, roles, rng = Math.random) {
+  const order = shuffle([...Array(playerCount).keys()], rng);
+  if (roles[order[0]] === ROLES.mrwhite) {
+    const spot = order.findIndex((seat) => roles[seat] !== ROLES.mrwhite);
+    if (spot > 0) [order[0], order[spot]] = [order[spot], order[0]];
+  }
+  return order;
+}
+
+/**
+ * 'civilians' when no special is left alive, 'impostors' when the specials
+ * match the civilians, null while the round continues.
+ */
+function checkWin(roles, alive) {
+  const living = alive.filter((seat) => seat >= 0 && seat < roles.length);
+  const specials = living.filter((seat) => roles[seat] !== ROLES.civilian).length;
+  const civilians = living.length - specials;
+  if (specials === 0) return 'civilians';
+  if (specials >= civilians) return 'impostors';
+  return null;
+}
+
+/** Points per seat for a finished round. */
+function roundDeltas({ roles, alive, winner, mrWhiteIndex = -1 }) {
+  const deltas = [];
+  if (winner === 'civilians') {
+    for (const seat of alive) {
+      if (roles[seat] === ROLES.civilian) deltas.push({ index: seat, points: POINTS.civiliansWin });
+    }
+  } else if (winner === 'impostors') {
+    for (const seat of alive) {
+      if (roles[seat] !== ROLES.civilian) deltas.push({ index: seat, points: POINTS.impostorsWin });
+    }
+  } else if (winner === 'mrwhite' && mrWhiteIndex >= 0) {
+    deltas.push({ index: mrWhiteIndex, points: POINTS.mrWhiteGuess });
+  }
+  return deltas;
+}
+
+/** Case-insensitive, whitespace-trimmed comparison for the Mr. White guess. */
+function guessMatches(guess, mainWord) {
+  const normalize = (text) => String(text ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
+  return normalize(guess) === normalize(mainWord) && normalize(guess).length > 0;
+}
+
+// --- src/store.js ---
+// localStorage-backed persistence.
+//
+// Everything lives under the "ucw." namespace:
+//   ucw.players    [{ id, name }]
+//   ucw.scores     { [playerId]: number }
+//   ucw.settings   { categories, difficulty, includeMrWhite, undercoverCount, timerSeconds }
+//   ucw.usedWordIds [ "fd3", "pf1", ... ]
+//
+// The backend is injectable so the draw/tests can run without a browser.
+
+const KEYS = {
+  players: 'players',
+  scores: 'scores',
+  settings: 'settings',
+  usedWordIds: 'usedWordIds',
+};
+
+const DEFAULT_SETTINGS = {
+  categories: null, // null means "every category in words.json"
+  difficulty: 'all', // 'all' | 'easy' | 'medium' | 'hard'
+  includeMrWhite: true,
+  undercoverCount: 1,
+  timerSeconds: 0,
+};
+
+function memoryBackend() {
+  const map = new Map();
+  return {
+    getItem: (key) => (map.has(key) ? map.get(key) : null),
+    setItem: (key, value) => map.set(key, String(value)),
+    removeItem: (key) => map.delete(key),
+  };
+}
+
+function createStore(backend) {
+  const base = `ucw.`;
+
+  function read(key, fallback) {
+    if (!backend) return fallback;
+    try {
+      const raw = backend.getItem(base + key);
+      if (raw === null) return fallback;
+      return JSON.parse(raw);
+    } catch {
+      return fallback;
+    }
+  }
+
+  function write(key, value) {
+    if (!backend) return;
+    try {
+      backend.setItem(base + key, JSON.stringify(value));
+    } catch {
+      // Quota or private mode: the game still works, it just forgets.
+    }
+  }
+
+  return {
+    getPlayers() {
+      const players = read(KEYS.players, []);
+      return Array.isArray(players) ? players.filter((p) => p && typeof p.name === 'string') : [];
+    },
+    setPlayers(players) {
+      write(KEYS.players, players);
+    },
+    getScores() {
+      const scores = read(KEYS.scores, {});
+      return scores && typeof scores === 'object' ? scores : {};
+    },
+    setScores(scores) {
+      write(KEYS.scores, scores);
+    },
+    getSettings() {
+      const settings = read(KEYS.settings, {});
+      return { ...DEFAULT_SETTINGS, ...(settings && typeof settings === 'object' ? settings : {}) };
+    },
+    setSettings(settings) {
+      write(KEYS.settings, settings);
+    },
+    /** Ids of pairs already drawn on this device. */
+    getUsedWordIds() {
+      const ids = read(KEYS.usedWordIds, []);
+      return Array.isArray(ids) ? ids.filter((id) => typeof id === 'string') : [];
+    },
+    setUsedWordIds(ids) {
+      write(KEYS.usedWordIds, [...new Set(ids)]);
+    },
+    reset() {
+      Object.values(KEYS).forEach((key) => backend?.removeItem(base + key));
+    },
+  };
+}
+
+function browserBackend() {
+  try {
+    const probe = '__ucw_probe__';
+    globalThis.localStorage.setItem(probe, '1');
+    globalThis.localStorage.removeItem(probe);
+    return globalThis.localStorage;
+  } catch {
+    return null;
+  }
+}
+
+const store = createStore(typeof globalThis.localStorage === 'undefined' ? memoryBackend() : browserBackend());
+
+// --- src/app.js ---
+const app = document.getElementById('app');
+
+const state = {
+  words: null,
+  error: null,
+  screen: 'lobby',
+  players: [],
+  scores: {},
+  settings: { ...DEFAULT_SETTINGS },
+  round: null,
+  pendingElimination: null,
+  timerHandle: null,
+  timerLeft: 0,
+};
+
+const esc = (value) =>
+  String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+
+const uid = () => (globalThis.crypto?.randomUUID?.() ?? `p${Math.random().toString(36).slice(2, 10)}`);
+
+/* ------------------------------------------------------------------ boot -- */
+
+
+async function boot() {
+  state.scores = store.getScores();
+  state.players = store.getPlayers();
+  if (state.players.length < MIN_PLAYERS) state.players = seedPlayers();
+
+  try {
+    // The standalone build inlines the words, because fetch() is blocked on file://.
+    if (globalThis.__UNDERCOVER_WORDS__) {
+      state.words = globalThis.__UNDERCOVER_WORDS__;
+    } else {
+      const response = await fetch('words.json', { cache: 'no-cache' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      state.words = await response.json();
+    }
+  } catch (error) {
+    state.error = String(error.message ?? error);
+  }
+
+  normalizeSettings();
+  render();
+}
+
+function seedPlayers() {
+  const seeded = Array.from({ length: MIN_PLAYERS }, (_, i) => ({ id: uid(), name: `Player ${i + 1}` }));
+  store.setPlayers(seeded);
+  return seeded;
+}
+
+function normalizeSettings() {
+  const settings = store.getSettings();
+  const names = state.words ? categoryNames(state.words) : [];
+
+  let categories = Array.isArray(settings.categories) ? settings.categories.filter((name) => names.includes(name)) : null;
+  if (categories && !categories.length) categories = null;
+
+  const difficulty = ['all', ...DIFFICULTIES].includes(settings.difficulty) ? settings.difficulty : 'all';
+  const allowed = allowedUndercoverCounts(state.players.length);
+  const undercoverCount = allowed.includes(settings.undercoverCount) ? settings.undercoverCount : allowed[0];
+  const includeMrWhite = Boolean(settings.includeMrWhite) && mrWhiteAvailable(state.players.length);
+
+  state.settings = {
+    ...DEFAULT_SETTINGS,
+    ...settings,
+    categories,
+    difficulty,
+    includeMrWhite,
+    undercoverCount,
+  };
+  persistSettings();
+}
+
+function persistSettings() {
+  store.setSettings(state.settings);
+}
+
+function selectedCategories() {
+  const names = state.words ? categoryNames(state.words) : [];
+  const chosen = state.settings.categories;
+  return Array.isArray(chosen) && chosen.length ? chosen.filter((name) => names.includes(name)) : names;
+}
+
+/* ---------------------------------------------------------------- screens -- */
+
+function render() {
+  if (state.timerHandle) {
+    clearInterval(state.timerHandle);
+    state.timerHandle = null;
+  }
+
+  if (state.error) {
+    app.innerHTML = `
+      <div class="screen screen--center">
+        <div class="empty-state">
+          <h1>Could not load words</h1>
+          <p class="muted">${esc(state.error)}</p>
+          <p class="muted">Serve the folder over http with <code>npm run dev</code> instead of opening <code>index.html</code> directly.</p>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const screens = {
+    lobby,
+    pass: passScreen,
+    reveal: revealScreen,
+    discussion: discussionScreen,
+    voting: votingScreen,
+    elimination: eliminationScreen,
+    roundOver: roundOverScreen,
+  };
+
+  (screens[state.screen] ?? lobby)();
+}
+
+const shell = (body, modifier = '') => `<div class="screen${modifier ? ` screen--${modifier}` : ''}">${body}</div>`;
+
+/* ----------------------------------------------------------------- lobby -- */
+
+function lobby() {
+  const words = state.words;
+  const names = categoryNames(words);
+  const difficulty = state.settings.difficulty;
+  const selected = selectedCategories();
+  const counts = categoryCounts(words, difficulty);
+  const pool = buildPool(words, { categories: selected, difficulty });
+  const used = store.getUsedWordIds();
+  const left = unusedPairs(pool, used).length;
+  const allSelected = selected.length === names.length;
+
+  const playerCount = state.players.length;
+  const issue = setupIssue({
+    playerCount,
+    includeMrWhite: state.settings.includeMrWhite,
+    undercoverCount: state.settings.undercoverCount,
+  });
+  const undercoverOptions = allowedUndercoverCounts(playerCount);
+  const mwAvailable = mrWhiteAvailable(playerCount);
+
+  const playerRows = state.players
+    .map(
+      (player, index) => `
+        <li class="player-row">
+          <span class="seat">${index + 1}</span>
+          <input class="name-input" data-name="${index}" value="${esc(player.name)}" maxlength="16" aria-label="Player ${index + 1} name" />
+          <span class="player-score">${state.scores[player.id] ?? 0}<small>pts</small></span>
+          <button class="icon-btn" data-remove="${index}" aria-label="Remove ${esc(player.name)}" ${playerCount <= MIN_PLAYERS ? 'disabled' : ''}>×</button>
+        </li>`,
+    )
+    .join('');
+
+  const chips = names
+    .map((name) => {
+      const on = selected.includes(name);
+      const count = counts[name] ?? 0;
+      return `<button class="chip ${on ? 'is-on' : ''}" data-category="${esc(name)}" aria-pressed="${on}" ${count === 0 ? 'disabled' : ''}>
+        <span>${esc(name)}</span><em>${count}</em>
+      </button>`;
+    })
+    .join('');
+
+  const difficultyButtons = ['all', ...DIFFICULTIES]
+    .map((level) => {
+      const count = level === 'all' ? poolCountFor('all') : poolCountFor(level);
+      return `<button data-difficulty="${level}" class="${difficulty === level ? 'is-active' : ''}" aria-pressed="${difficulty === level}">
+        ${DIFFICULTY_LABELS[level]}<em>${count}</em>
+      </button>`;
+    })
+    .join('');
+
+  app.innerHTML = shell(`
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Pass &amp; play</p>
+        <h1>Undercover<span class="accent">.</span></h1>
+      </div>
+      <div class="pool-badge ${left === 0 ? 'is-empty' : ''}">
+        <strong>${left}</strong>
+        <span>${left === 0 ? 'resets next round' : 'words left'}</span>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Players</h2>
+        <span class="muted">${playerCount}/${MAX_PLAYERS}</span>
+      </div>
+      <ul class="player-list">${playerRows}</ul>
+      <button class="btn btn-ghost" id="add-player" ${playerCount >= MAX_PLAYERS ? 'disabled' : ''}>+ Add player</button>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>Roles</h2></div>
+      <label class="switch-row ${mwAvailable ? '' : 'is-disabled'}">
+        <span class="switch-copy">
+          <strong>Mr. White</strong>
+          <small>${mwAvailable ? 'Sees no word, guesses it when caught' : `Needs ${MIN_PLAYERS + 1}+ players`}</small>
+        </span>
+        <input type="checkbox" id="mr-white" ${state.settings.includeMrWhite ? 'checked' : ''} ${mwAvailable ? '' : 'disabled'} />
+      </label>
+
+      <div class="field">
+        <span class="field-label">Undercover count</span>
+        <div class="segmented" role="group" aria-label="Undercover count">
+          ${undercoverOptions
+            .map(
+              (count) =>
+                `<button data-undercover="${count}" class="${state.settings.undercoverCount === count ? 'is-active' : ''}" aria-pressed="${state.settings.undercoverCount === count}">${count}</button>`,
+            )
+            .join('')}
+        </div>
+      </div>
+
+      <div class="field field--row">
+        <label class="field-label" for="timer">Discussion timer</label>
+        <select id="timer" class="select">
+          <option value="0" ${state.settings.timerSeconds === 0 ? 'selected' : ''}>Off</option>
+          <option value="120" ${state.settings.timerSeconds === 120 ? 'selected' : ''}>2 min</option>
+          <option value="180" ${state.settings.timerSeconds === 180 ? 'selected' : ''}>3 min</option>
+        </select>
+      </div>
+
+      ${issue ? `<p class="warn">${esc(issue)}</p>` : ''}
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Difficulty</h2>
+        <span class="muted">${left} unused</span>
+      </div>
+      <div class="segmented segmented--wide" role="group" aria-label="Difficulty">${difficultyButtons}</div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Categories</h2>
+        <button class="link" id="toggle-all">${allSelected ? 'Clear all' : 'Select all'}</button>
+      </div>
+      <div class="chips">${chips}</div>
+    </section>
+
+    <footer class="dock">
+      <button class="btn btn-primary btn-lg" id="start-round" ${issue ? 'disabled' : ''}>Start round</button>
+      <p class="dock-note">${selected.length} ${selected.length === 1 ? 'category' : 'categories'} · ${left} ${left === 1 ? 'word' : 'words'} in rotation</p>
+    </footer>
+  `);
+
+  bindLobby();
+}
+
+function poolCountFor(difficulty) {
+  if (!state.words) return 0;
+  return buildPool(state.words, { categories: selectedCategories(), difficulty }).length;
+}
+
+function bindLobby() {
+  app.querySelectorAll('[data-name]').forEach((input) => {
+    input.addEventListener('input', () => {
+      const index = Number(input.dataset.name);
+      state.players[index].name = input.value;
+      store.setPlayers(state.players);
+    });
+    input.addEventListener('blur', () => {
+      const index = Number(input.dataset.name);
+      const trimmed = input.value.trim() || `Player ${index + 1}`;
+      state.players[index].name = trimmed;
+      input.value = trimmed;
+      store.setPlayers(state.players);
+    });
+  });
+
+  app.querySelectorAll('[data-remove]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const index = Number(button.dataset.remove);
+      const [removed] = state.players.splice(index, 1);
+      if (removed) {
+        delete state.scores[removed.id];
+        store.setScores(state.scores);
+      }
+      store.setPlayers(state.players);
+      normalizeSettings();
+      render();
+    });
+  });
+
+  app.querySelector('#add-player')?.addEventListener('click', () => {
+    if (state.players.length >= MAX_PLAYERS) return;
+    state.players.push({ id: uid(), name: `Player ${state.players.length + 1}` });
+    store.setPlayers(state.players);
+    normalizeSettings();
+    render();
+  });
+
+  app.querySelector('#mr-white')?.addEventListener('change', (event) => {
+    state.settings.includeMrWhite = event.target.checked;
+    persistSettings();
+    render();
+  });
+
+  app.querySelectorAll('[data-undercover]').forEach((button) => {
+    button.addEventListener('click', () => {
+      state.settings.undercoverCount = Number(button.dataset.undercover);
+      persistSettings();
+      render();
+    });
+  });
+
+  app.querySelector('#timer')?.addEventListener('change', (event) => {
+    state.settings.timerSeconds = Number(event.target.value);
+    persistSettings();
+  });
+
+  app.querySelectorAll('[data-difficulty]').forEach((button) => {
+    button.addEventListener('click', () => {
+      state.settings.difficulty = button.dataset.difficulty;
+      persistSettings();
+      render();
+    });
+  });
+
+  app.querySelectorAll('[data-category]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const name = button.dataset.category;
+      const names = categoryNames(state.words);
+      const current = selectedCategories();
+      const next = current.includes(name) ? current.filter((entry) => entry !== name) : [...current, name];
+      // Keep the JSON order so the selection stays stable between renders.
+      state.settings.categories = next.length === names.length ? null : names.filter((entry) => next.includes(entry));
+      persistSettings();
+      render();
+    });
+  });
+
+  app.querySelector('#toggle-all')?.addEventListener('click', () => {
+    state.settings.categories = selectedCategories().length === categoryNames(state.words).length ? [] : null;
+    if (Array.isArray(state.settings.categories) && !state.settings.categories.length) {
+      // Empty selection is illegal; fall back to everything so the button never traps the player.
+      state.settings.categories = null;
+    }
+    persistSettings();
+    render();
+  });
+
+  app.querySelector('#start-round')?.addEventListener('click', startRound);
+}
+
+/* ----------------------------------------------------------------- round -- */
+
+function startRound() {
+  const playerCount = state.players.length;
+  const issue = setupIssue({
+    playerCount,
+    includeMrWhite: state.settings.includeMrWhite,
+    undercoverCount: state.settings.undercoverCount,
+  });
+  if (issue) return;
+
+  const pool = buildPool(state.words, {
+    categories: selectedCategories(),
+    difficulty: state.settings.difficulty,
+  });
+  if (!pool.length) return;
+
+  const usedIds = store.getUsedWordIds();
+  const draw = drawPair(pool, usedIds);
+  store.setUsedWordIds(draw.usedIds);
+
+  const roles = assignRoles(
+    playerCount,
+    { includeMrWhite: state.settings.includeMrWhite, undercoverCount: state.settings.undercoverCount },
+    Math.random,
+  );
+
+  state.round = {
+    pair: draw.pair,
+    origin: draw.pick,
+    swapped: draw.swapped,
+    reset: draw.reset,
+    roles,
+    order: speakingOrder(playerCount, roles),
+    revealIndex: 0,
+    revealedOnce: false,
+    alive: [...Array(playerCount).keys()],
+    eliminated: [],
+    awaitingGuess: false,
+    guess: '',
+    guessCorrect: false,
+    winner: null,
+    deltas: [],
+  };
+  state.timerLeft = state.settings.timerSeconds;
+  state.pendingElimination = null;
+  state.screen = 'pass';
+  render();
+}
+
+function passScreen() {
+  const round = state.round;
+  const player = state.players[round.revealIndex];
+  const total = state.players.length;
+
+  app.innerHTML = shell(`
+    <div class="stage">
+      <p class="eyebrow">Card ${round.revealIndex + 1} of ${total}</p>
+      <h2 class="stage-title">Pass the phone to<br /><span class="accent">${esc(player.name)}</span></h2>
+      <p class="muted">Everyone else, look away.</p>
+    </div>
+    <footer class="dock">
+      <button class="btn btn-primary btn-lg" id="im-ready">I am ${esc(player.name)}</button>
+    </footer>
+  `);
+
+  app.querySelector('#im-ready').addEventListener('click', () => {
+    state.screen = 'reveal';
+    state.round.revealedOnce = false;
+    render();
+  });
+}
+
+function revealScreen() {
+  const round = state.round;
+  const seat = round.revealIndex;
+  const player = state.players[seat];
+  const role = round.roles[seat];
+  const isMrWhite = role === 'mrwhite';
+  const word = role === 'undercover' ? round.pair.impostor : round.pair.main;
+  const isLast = seat === state.players.length - 1;
+
+  const secret = isMrWhite
+    ? `<p class="mw-flag">You are MR. WHITE</p>
+       <p class="mw-copy">No word for you. Blend in, and if you get voted out, guess the secret word.</p>`
+    : `<p class="word">${esc(word)}</p>
+       <p class="word-note">Don't say it out loud.</p>`;
+
+  app.innerHTML = shell(`
+    <div class="stage stage--tight">
+      <p class="eyebrow">${esc(player.name)} · ${seat + 1} of ${state.players.length}</p>
+    </div>
+
+    <div class="hold-card" id="hold" tabindex="0" role="button" aria-label="Press and hold to reveal your card">
+      <div class="hold-idle">
+        <span class="hold-icon">◉</span>
+        <strong>Press &amp; hold</strong>
+        <small>Release to hide</small>
+      </div>
+      <div class="hold-word">${secret}</div>
+    </div>
+
+    <footer class="dock">
+      <button class="btn btn-primary btn-lg" id="next-player" disabled>${isLast ? 'Start discussion' : 'Next player'}</button>
+    </footer>
+  `, 'reveal');
+
+  const hold = app.querySelector('#hold');
+  const next = app.querySelector('#next-player');
+
+  const show = () => {
+    hold.classList.add('is-revealed');
+    next.disabled = false;
+    state.round.revealedOnce = true;
+  };
+  const hide = () => hold.classList.remove('is-revealed');
+
+  hold.addEventListener('pointerdown', (event) => {
+    event.preventDefault();
+    try {
+      hold.setPointerCapture?.(event.pointerId);
+    } catch {
+      // Synthetic or already-released pointers cannot be captured; the reveal still works.
+    }
+    show();
+  });
+  ['pointerup', 'pointercancel'].forEach((type) => hold.addEventListener(type, hide));
+  hold.addEventListener('keydown', (event) => {
+    if (event.code === 'Space' || event.code === 'Enter') {
+      event.preventDefault();
+      show();
+    }
+  });
+  hold.addEventListener('keyup', hide);
+  hold.addEventListener('blur', hide);
+
+  next.addEventListener('click', () => {
+    if (!state.round.revealedOnce) return;
+    hide();
+    if (seat + 1 < state.players.length) {
+      state.round.revealIndex = seat + 1;
+      state.round.revealedOnce = false;
+      state.screen = 'pass';
+    } else {
+      state.screen = 'discussion';
+      state.timerLeft = state.settings.timerSeconds;
+    }
+    render();
+  });
+}
+
+function eliminationSummary() {
+  const round = state.round;
+  if (!round.eliminated.length) return '';
+  return `<div class="vote-history">
+    ${round.eliminated
+      .map((seat) => `<span class="tag tag--${round.roles[seat]}">${esc(state.players[seat].name)} · ${ROLE_LABELS[round.roles[seat]]}</span>`)
+      .join('')}
+  </div>`;
+}
+
+function discussionScreen() {
+  const round = state.round;
+  const names = round.order.map((seat) => state.players[seat].name);
+  const timerOn = state.settings.timerSeconds > 0;
+
+  app.innerHTML = shell(`
+    <div class="stage stage--tight">
+      <p class="eyebrow">Clue round ${round.eliminated.length + 1}</p>
+      <h2 class="stage-title">Speaking order</h2>
+      <p class="muted">Mr. White never goes first.</p>
+    </div>
+
+    <ol class="order-list">
+      ${names
+        .map(
+          (name, index) => `<li class="${round.alive.includes(round.order[index]) ? '' : 'is-out'}">
+            <span class="order-index">${index + 1}</span>
+            <span>${esc(name)}</span>
+            ${round.alive.includes(round.order[index]) ? '' : '<em class="out-flag">out</em>'}
+          </li>`,
+        )
+        .join('')}
+    </ol>
+
+    ${timerOn ? `<div class="clock" id="clock">${formatClock(state.timerLeft)}</div>` : ''}
+    ${eliminationSummary()}
+
+    <footer class="dock">
+      <button class="btn btn-primary btn-lg" id="to-voting">Go to voting</button>
+    </footer>
+  `);
+
+  if (timerOn) startClock();
+
+  app.querySelector('#to-voting').addEventListener('click', () => {
+    state.pendingElimination = null;
+    state.screen = 'voting';
+    render();
+  });
+}
+
+function formatClock(seconds) {
+  const safe = Math.max(0, seconds);
+  return `${Math.floor(safe / 60)}:${String(safe % 60).padStart(2, '0')}`;
+}
+
+function startClock() {
+  const clock = app.querySelector('#clock');
+  if (!clock) return;
+  let left = state.timerLeft;
+  clock.textContent = formatClock(left);
+
+  state.timerHandle = setInterval(() => {
+    left -= 1;
+    state.timerLeft = Math.max(0, left);
+    const node = app.querySelector('#clock');
+    if (!node) return;
+    node.textContent = formatClock(left);
+    if (left <= 0) {
+      node.classList.add('is-done');
+      node.textContent = "Time's up";
+      clearInterval(state.timerHandle);
+      state.timerHandle = null;
+    }
+  }, 1000);
+}
+
+function votingScreen() {
+  const round = state.round;
+  const alive = round.alive;
+
+  app.innerHTML = shell(`
+    <div class="stage stage--tight">
+      <p class="eyebrow">Who gets voted out?</p>
+      <h2 class="stage-title">Pick one player</h2>
+    </div>
+
+    <div class="vote-grid">
+      ${alive
+        .map((seat) => {
+          const active = state.pendingElimination === seat;
+          return `<button class="vote-btn ${active ? 'is-active' : ''}" data-vote="${seat}" aria-pressed="${active}">
+            <span class="avatar">${esc(state.players[seat].name.slice(0, 1).toUpperCase())}</span>
+            <span>${esc(state.players[seat].name)}</span>
+          </button>`;
+        })
+        .join('')}
+    </div>
+
+    ${
+      state.pendingElimination !== null
+        ? `<div class="confirm">
+            <p>Eliminate <strong>${esc(state.players[state.pendingElimination].name)}</strong>?</p>
+            <div class="confirm-actions">
+              <button class="btn btn-danger" id="confirm-vote">Yes, eliminate</button>
+              <button class="btn btn-ghost" id="cancel-vote">Cancel</button>
+            </div>
+          </div>`
+        : ''
+    }
+
+    ${eliminationSummary()}
+
+    <footer class="dock">
+      <button class="btn btn-ghost" id="skip-vote">Skip this vote</button>
+    </footer>
+  `);
+
+  app.querySelectorAll('[data-vote]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const seat = Number(button.dataset.vote);
+      state.pendingElimination = state.pendingElimination === seat ? null : seat;
+      render();
+    });
+  });
+
+  app.querySelector('#confirm-vote')?.addEventListener('click', () => eliminate(state.pendingElimination));
+
+  app.querySelector('#cancel-vote')?.addEventListener('click', () => {
+    state.pendingElimination = null;
+    render();
+  });
+
+  app.querySelector('#skip-vote')?.addEventListener('click', () => {
+    state.pendingElimination = null;
+    state.timerLeft = state.settings.timerSeconds;
+    state.screen = 'discussion';
+    render();
+  });
+}
+
+function eliminate(seat) {
+  if (seat === null || seat === undefined || !state.round) return;
+  const round = state.round;
+  if (!round.alive.includes(seat)) return;
+
+  round.alive = round.alive.filter((entry) => entry !== seat);
+  round.eliminated.push(seat);
+  state.pendingElimination = null;
+
+  const role = round.roles[seat];
+  if (role === 'mrwhite') {
+    round.awaitingGuess = true;
+    round.guess = '';
+  } else {
+    round.awaitingGuess = false;
+    const winner = checkWin(round.roles, round.alive);
+    if (winner) conclude(winner);
+  }
+
+  state.screen = 'elimination';
+  render();
+}
+
+function conclude(winner) {
+  const round = state.round;
+  round.winner = winner;
+  round.deltas = roundDeltas({
+    roles: round.roles,
+    alive: round.alive,
+    winner,
+    mrWhiteIndex: round.roles.indexOf('mrwhite'),
+  });
+
+  for (const delta of round.deltas) {
+    const player = state.players[delta.index];
+    if (!player) continue;
+    state.scores[player.id] = (state.scores[player.id] ?? 0) + delta.points;
+  }
+  store.setScores(state.scores);
+}
+
+function eliminationScreen() {
+  const round = state.round;
+  const seat = round.eliminated[round.eliminated.length - 1];
+  const role = round.roles[seat];
+  const player = state.players[seat];
+
+  const guessForm = round.awaitingGuess
+    ? `<form class="guess" id="guess-form">
+         <label class="field-label" for="guess-input">Mr. White, what was the secret word?</label>
+         <input class="input" id="guess-input" name="guess" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Type your guess" />
+         <button class="btn btn-primary" type="submit">Lock in guess</button>
+         <p class="muted small">Exact word wins 5 points.</p>
+       </form>`
+    : '';
+
+  const outcome = round.winner
+    ? `<div class="outcome">
+         <p class="outcome-title">${winnerHeadline(round.winner)}</p>
+         <button class="btn btn-primary btn-lg" id="to-results">See results</button>
+       </div>`
+    : `<div class="outcome">
+         <p class="outcome-title">Not over yet</p>
+         <p class="muted">The game continues with ${round.alive.length} players.</p>
+         <button class="btn btn-primary btn-lg" id="next-clue-round">Next clue round</button>
+       </div>`;
+
+  app.innerHTML = shell(`
+    <div class="stage stage--tight">
+      <p class="eyebrow">Eliminated</p>
+      <h2 class="stage-title">${esc(player.name)} was</h2>
+    </div>
+
+    <div class="reveal-card reveal-card--${role}">
+      <p class="role-flag">${ROLE_LABELS[role]}</p>
+      <p class="muted">${role === 'mrwhite' ? 'No word, all nerve.' : `Their word: <strong>${esc(role === 'undercover' ? round.pair.impostor : round.pair.main)}</strong>`}</p>
+    </div>
+
+    ${guessForm}
+    ${outcome}
+  `);
+
+  app.querySelector('#guess-form')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const value = app.querySelector('#guess-input').value;
+    round.guess = value;
+    round.guessCorrect = guessMatches(value, round.pair.main);
+
+    if (round.guessCorrect) {
+      round.awaitingGuess = false;
+      conclude('mrwhite');
+    } else {
+      round.awaitingGuess = false;
+      const winner = checkWin(round.roles, round.alive);
+      if (winner) conclude(winner);
+    }
+    render();
+  });
+
+  app.querySelector('#to-results')?.addEventListener('click', () => {
+    state.screen = 'roundOver';
+    render();
+  });
+
+  app.querySelector('#next-clue-round')?.addEventListener('click', () => {
+    state.timerLeft = state.settings.timerSeconds;
+    state.screen = 'discussion';
+    render();
+  });
+}
+
+function winnerHeadline(winner) {
+  if (winner === 'civilians') return 'Civilians win';
+  if (winner === 'impostors') return 'Impostors win';
+  return 'Mr. White wins';
+}
+
+function roundOverScreen() {
+  const round = state.round;
+  const pointsBySeat = new Map(round.deltas.map((delta) => [delta.index, delta.points]));
+  const totals = [...state.players]
+    .map((player) => ({ name: player.name, score: state.scores[player.id] ?? 0 }))
+    .sort((a, b) => b.score - a.score);
+
+  app.innerHTML = shell(`
+    <div class="stage stage--tight">
+      <p class="eyebrow">Round over</p>
+      <h2 class="stage-title">${winnerHeadline(round.winner)}</h2>
+      <p class="muted">${round.winner === 'mrwhite' ? `Guessed “${esc(round.guess.trim())}” — spot on.` : 'Roles are public now.'}</p>
+    </div>
+
+    <section class="card card--words">
+      <div class="word-pair">
+        <div><small>Main word</small><strong>${esc(round.pair.main)}</strong></div>
+        <div class="word-divider"></div>
+        <div><small>Impostor word</small><strong>${esc(round.pair.impostor)}</strong></div>
+      </div>
+      <p class="muted small">${esc(round.pair.category)} · ${round.pair.difficulty}${round.swapped ? ' · swapped' : ''}</p>
+    </section>
+
+    <ul class="result-list">
+      ${state.players
+        .map((player, seat) => {
+          const points = pointsBySeat.get(seat) ?? 0;
+          return `<li>
+            <span class="role-dot role-dot--${round.roles[seat]}"></span>
+            <span class="result-name">${esc(player.name)}</span>
+            <span class="result-role">${ROLE_LABELS[round.roles[seat]]}</span>
+            <span class="result-points ${points ? 'is-scored' : ''}">${points ? `+${points}` : '—'}</span>
+          </li>`;
+        })
+        .join('')}
+    </ul>
+
+    <section class="card">
+      <div class="card-head"><h2>Scoreboard</h2></div>
+      <ol class="scoreboard">
+        ${totals.map((row, index) => `<li><span class="rank">${index + 1}</span><span>${esc(row.name)}</span><strong>${row.score}</strong></li>`).join('')}
+      </ol>
+    </section>
+
+    <footer class="dock">
+      <button class="btn btn-primary btn-lg" id="play-again">Play next round</button>
+      <button class="btn btn-ghost" id="back-lobby">Back to lobby</button>
+    </footer>
+  `);
+
+  app.querySelector('#play-again').addEventListener('click', startRound);
+  app.querySelector('#back-lobby').addEventListener('click', () => {
+    state.round = null;
+    state.screen = 'lobby';
+    render();
+  });
+}
+boot();
+</script>
+</body>
+</html>
