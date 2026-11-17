@@ -29,6 +29,7 @@ test.after(() => rm(dir, { recursive: true, force: true }));
 test('the shell is wired for installation', () => {
   assert.match(html, /<link rel="manifest" href="manifest\.webmanifest"/);
   assert.match(html, /<link rel="apple-touch-icon" href="icons\/apple-touch-icon\.png"/);
+  assert.match(html, /<meta name="mobile-web-app-capable" content="yes"/);
   assert.match(html, /name="apple-mobile-web-app-capable" content="yes"/);
   assert.match(html, /navigator\.serviceWorker\.register\('sw\.js'\)/);
   assert.match(html, /<script type="module" src="\.\/src\/app\.js"><\/script>/);
